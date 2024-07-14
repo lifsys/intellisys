@@ -1,6 +1,7 @@
 """
 Provides intelligence/AI services for the Lifsys Enterprise
 """
+__version__ = "0.1.0"
 import os
 import json
 from time import sleep
