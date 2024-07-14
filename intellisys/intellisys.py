@@ -1,17 +1,35 @@
 """
-Provides intelligence/AI services for the Lifsys Enterprise
+Provides intelligence/AI services for the Lifsys Enterprise.
+
+This module requires a 1Password Connect server to be available and configured.
+The OP_CONNECT_TOKEN and OP_CONNECT_HOST environment variables must be set
+for the onepasswordconnectsdk to function properly.
 """
 __version__ = "0.1.0"
 import os
 import json
 from time import sleep
-from typing import Optional
+from typing import Optional, Dict, List
 from openai import OpenAI
 from litellm import completion
 from jinja2 import Template
 from onepasswordconnectsdk import new_client_from_environment
 
-def get_api(item, key_name, vault="API"):
+def get_api(item: str, key_name: str, vault: str = "API") -> str:
+    """
+    Retrieve an API key from 1Password.
+
+    Args:
+        item (str): The name of the item in 1Password.
+        key_name (str): The name of the key within the item.
+        vault (str, optional): The name of the vault. Defaults to "API".
+
+    Returns:
+        str: The retrieved API key.
+
+    Raises:
+        Exception: If there's an error connecting to 1Password or retrieving the key.
+    """
     try:
         client = new_client_from_environment()
         item = client.get_item(item, vault)
@@ -21,14 +39,31 @@ def get_api(item, key_name, vault="API"):
     except Exception as e:
         raise Exception(f"Connect Error: {e}")
 
-def fix_json(json_string):
+def fix_json(json_string: str) -> str:
+    """
+    Fix and format a JSON string using an AI model.
+
+    Args:
+        json_string (str): The JSON string to fix and format.
+
+    Returns:
+        str: The fixed and formatted JSON string.
+    """
     prompt = f"You are a JSON formatter, fixing any issues with JSON formats. Review the following JSON: {json_string}. Return a fixed JSON formatted string but do not lead with ```json\n, without making changes to the content."
     return get_completion_api(prompt, "gemini-flash", "system", prompt)
 
-def template_api_json(model, render_data, system_message, persona):
+def template_api_json(model: str, render_data: Dict, system_message: str, persona: str) -> Dict:
     """
-    Get the completion response from the API using the specified model.
-    render_data: The data to render the template, e.g. {"name": "John"} - dict
+    Get the completion response from the API using the specified model and return it as a JSON object.
+
+    Args:
+        model (str): The name of the AI model to use.
+        render_data (Dict): The data to render the template, e.g. {"name": "John"}.
+        system_message (str): The system message to use as a template.
+        persona (str): The persona to use for the API call.
+
+    Returns:
+        Dict: The API response as a JSON object.
     """
     xtemplate = Template(system_message)
     prompt = xtemplate.render(render_data)
@@ -37,32 +72,57 @@ def template_api_json(model, render_data, system_message, persona):
     response = json.loads(response)
     return response
 
-def template_api(model, render_data, system_message, persona):
+def template_api(model: str, render_data: Dict, system_message: str, persona: str) -> str:
     """
     Get the completion response from the API using the specified model.
-    render_data: The data to render the template, e.g. {"name": "John"} - dict
+
+    Args:
+        model (str): The name of the AI model to use.
+        render_data (Dict): The data to render the template, e.g. {"name": "John"}.
+        system_message (str): The system message to use as a template.
+        persona (str): The persona to use for the API call.
+
+    Returns:
+        str: The API response as a string.
     """
     xtemplate = Template(system_message)
     prompt = xtemplate.render(render_data)
     response = get_completion_api(prompt, model, "system", persona)
     return response
 
-def initialize_client():
+def initialize_client() -> OpenAI:
     """
     Initialize the OpenAI client with the provided API key.
+
+    Returns:
+        OpenAI: An initialized OpenAI client.
     """
     api_key = get_api("OPEN-AI", "Mamba")
     return OpenAI(api_key=api_key)
 
-def create_thread(client):
+def create_thread(client: OpenAI):
     """
     Create a new thread using the OpenAI client.
+
+    Args:
+        client (OpenAI): An initialized OpenAI client.
+
+    Returns:
+        Thread: A new thread object.
     """
     return client.beta.threads.create()
 
-def send_message(client, thread_id, reference):
+def send_message(client: OpenAI, thread_id: str, reference: str):
     """
     Send a message to the specified thread.
+
+    Args:
+        client (OpenAI): An initialized OpenAI client.
+        thread_id (str): The ID of the thread to send the message to.
+        reference (str): The content of the message to send.
+
+    Returns:
+        Message: The created message object.
     """
     return client.beta.threads.messages.create(
         thread_id=thread_id,
@@ -70,17 +130,33 @@ def send_message(client, thread_id, reference):
         content=reference,
     )
 
-def run_assistant(client, thread_id, assistant_id):
+def run_assistant(client: OpenAI, thread_id: str, assistant_id: str):
     """
     Run the assistant for the specified thread.
+
+    Args:
+        client (OpenAI): An initialized OpenAI client.
+        thread_id (str): The ID of the thread to run the assistant on.
+        assistant_id (str): The ID of the assistant to run.
+
+    Returns:
+        Run: The created run object.
     """
     return client.beta.threads.runs.create(
         thread_id=thread_id, assistant_id=assistant_id
     )
 
-def wait_for_run_completion(client, thread_id, run_id):
+def wait_for_run_completion(client: OpenAI, thread_id: str, run_id: str):
     """
     Wait for the assistant run to complete.
+
+    Args:
+        client (OpenAI): An initialized OpenAI client.
+        thread_id (str): The ID of the thread.
+        run_id (str): The ID of the run to wait for.
+
+    Returns:
+        Run: The completed run object.
     """
     run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
     while run.status in ["queued", "in_progress"]:
@@ -88,9 +164,16 @@ def wait_for_run_completion(client, thread_id, run_id):
         run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
     return run
 
-def get_assistant_responses(client, thread_id):
+def get_assistant_responses(client: OpenAI, thread_id: str) -> List[str]:
     """
     Retrieve and clean the assistant's responses from the thread.
+
+    Args:
+        client (OpenAI): An initialized OpenAI client.
+        thread_id (str): The ID of the thread to retrieve responses from.
+
+    Returns:
+        List[str]: A list of assistant responses.
     """
     message_list = client.beta.threads.messages.list(thread_id=thread_id)
     assistant_responses = [
@@ -100,9 +183,16 @@ def get_assistant_responses(client, thread_id):
     ]
     return assistant_responses
 
-def get_assistant(reference, assistant_id):
+def get_assistant(reference: str, assistant_id: str) -> List[str]:
     """
     Get the assistant's response for the given reference and assistant ID.
+
+    Args:
+        reference (str): The reference message to send to the assistant.
+        assistant_id (str): The ID of the assistant to use.
+
+    Returns:
+        List[str]: A list of assistant responses.
     """
     client = initialize_client()
     thread = create_thread(client)
@@ -121,11 +211,17 @@ def get_completion_api(
     """
     Get the completion response from the API using the specified model.
 
-    :param prompt: The prompt to send to the API.
-    :param model_name: The name of the model to use for completion.
-    :param mode: The mode of message sending (simple or system).
-    :param system_message: The system message to send if in system mode.
-    :return: The completion response content.
+    Args:
+        prompt (str): The prompt to send to the API.
+        model_name (str): The name of the model to use for completion.
+        mode (str, optional): The mode of message sending (simple or system). Defaults to "simple".
+        system_message (Optional[str], optional): The system message to send if in system mode. Defaults to None.
+
+    Returns:
+        Optional[str]: The completion response content, or None if an error occurs.
+
+    Raises:
+        ValueError: If an unsupported model or mode is specified.
     """
     try:
         # Select the model and set the appropriate API key
