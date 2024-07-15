@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.1.3] - 2024-07-16
+- Prepared repository for PyPI upload
+- Updated setup.py and pyproject.toml
+
 ## [0.1.2] - 2024-07-15
 - Updated repository for PyPI upload
 - Moved version to intellisys/__init__.py

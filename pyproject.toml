@@ -44,8 +44,11 @@ Documentation = "https://intellisys.readthedocs.io/"
 Repository = "https://github.com/lifsys/intellisys.git"
 "Bug Tracker" = "https://github.com/lifsys/intellisys/issues"
 
-[tool.setuptools_scm]
-write_to = "intellisys/_version.py"
+[tool.setuptools.dynamic]
+version = {attr = "intellisys.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["intellisys", "intellisys.*"]
 
 [tool.black]
 line-length = 88
