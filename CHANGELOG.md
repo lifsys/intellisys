@@ -8,12 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial release of the Intellisys package
-- Support for multiple AI models (OpenAI, Anthropic, Google, etc.)
-- Secure API key management using 1Password Connect
-- JSON formatting and template rendering
-- Asynchronous assistant interactions
-- Template-based API calls
 
 ### Changed
 
@@ -24,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 ### Security
+
+## [0.1.2] - 2024-07-15
+- Updated repository for PyPI upload
+- Moved version to intellisys/__init__.py
 
 ## [0.1.1] - 2024-07-14
 - Prepared package for PyPI release

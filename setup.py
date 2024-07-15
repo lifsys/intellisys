@@ -1,12 +1,17 @@
 from setuptools import setup, find_packages
+import re
 
 # Read the contents of your README file
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+# Get version from intellisys/__init__.py
+with open('intellisys/__init__.py', 'r') as f:
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
+
 setup(
     name="intellisys",
-    version="0.1.1",
+    version=version,
     author="Lifsys Enterprise",
     author_email="contact@lifsys.com",
     description="Intelligence/AI services for the Lifsys Enterprise",
