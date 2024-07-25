@@ -13,7 +13,7 @@ from .intellisys import (
     get_completion_api
 )
 
-__version__ = "0.1.7"
+__version__ = "0.1.8"
 
 __all__ = [
     'get_api',

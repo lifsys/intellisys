@@ -88,6 +88,11 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Changelog
+
+For a detailed list of changes and version history, please refer to the [CHANGELOG.md](https://github.com/lifsys/intellisys/blob/main/CHANGELOG.md) file.
+
 ## About Lifsys, Inc
 
 Lifsys, Inc is an AI company dedicated to developing solutions for the future. For more information, visit [www.lifsys.com](https://www.lifsys.com).

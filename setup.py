@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="intellisys",
-    version="0.1.7",  # Make sure this matches the version in intellisys/__init__.py
+    version="0.1.8",  # Make sure this matches the version in intellisys/__init__.py
     packages=find_packages(),
     install_requires=[
         "openai",
