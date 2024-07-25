@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.1.6] - 2024-07-25
+- Incremented version number for PyPI release consistency
+
 ## [0.1.5] - 2024-07-25
 - Incremented version number for PyPI release
 
