@@ -12,7 +12,7 @@ pip install intellisys
 
 ## Requirements
 
-- Python 3.7 or higher
+- Python 3.6 or higher
 - A 1Password Connect server (for API key management)
 - Environment variables:
   - `OP_CONNECT_TOKEN`: Your 1Password Connect token
@@ -22,7 +22,7 @@ pip install intellisys
 
 ## Features
 
-- Support for multiple AI models (OpenAI, Anthropic, Google, etc.)
+- Support for multiple AI models (OpenAI, Anthropic, Google, TogetherAI, Groq, MistralAI)
 - Secure API key management using 1Password Connect
 - JSON formatting and template rendering
 - Asynchronous assistant interactions
@@ -37,7 +37,7 @@ from intellisys import get_completion_api
 
 # Make sure OP_CONNECT_TOKEN and OP_CONNECT_HOST are set in your environment
 
-response = get_completion_api("Hello, how are you?", "gpt-3.5-turbo")
+response = get_completion_api("Hello, how are you?", "gpt-4")
 print(response)
 ```
 
@@ -59,6 +59,17 @@ responses = get_assistant(reference, assistant_id)
 for response in responses:
     print(response)
 ```
+
+## Supported Models
+
+Intellisys supports a variety of AI models:
+
+- OpenAI: gpt-4o-mini, gpt-4, gpt-4o
+- Anthropic: claude-3.5
+- Google: gemini-flash
+- TogetherAI: llama-3-70b, llama-3.1-large
+- Groq: groq-llama, groq-fast
+- MistralAI: mistral-large
 
 ## API Reference
 
