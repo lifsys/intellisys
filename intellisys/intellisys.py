@@ -179,11 +179,20 @@ def create_thread(client: OpenAI):
     """
     Create a new thread using the OpenAI client.
 
+    This function initializes a new conversation thread using the provided OpenAI client.
+    Threads are used to maintain context in multi-turn conversations with AI assistants.
+
     Args:
-        client (OpenAI): An initialized OpenAI client.
+        client (OpenAI): An initialized OpenAI client object.
 
     Returns:
-        Thread: A new thread object.
+        Thread: A new thread object representing the created conversation thread.
+
+    Example:
+        >>> client = initialize_client()
+        >>> new_thread = create_thread(client)
+        >>> print(new_thread.id)
+        'thread_abc123...'
     """
     return client.beta.threads.create()
 
@@ -191,13 +200,23 @@ def send_message(client: OpenAI, thread_id: str, reference: str):
     """
     Send a message to the specified thread.
 
+    This function adds a new message to an existing conversation thread. The message
+    is sent with the 'user' role, representing input from the user to the AI assistant.
+
     Args:
-        client (OpenAI): An initialized OpenAI client.
+        client (OpenAI): An initialized OpenAI client object.
         thread_id (str): The ID of the thread to send the message to.
         reference (str): The content of the message to send.
 
     Returns:
-        Message: The created message object.
+        Message: The created message object, containing details about the sent message.
+
+    Example:
+        >>> client = initialize_client()
+        >>> thread_id = "thread_abc123..."
+        >>> message = send_message(client, thread_id, "What's the weather like today?")
+        >>> print(message.content)
+        'What's the weather like today?'
     """
     return client.beta.threads.messages.create(
         thread_id=thread_id,
@@ -209,13 +228,24 @@ def run_assistant(client: OpenAI, thread_id: str, assistant_id: str):
     """
     Run the assistant for the specified thread.
 
+    This function initiates a new run of the AI assistant on the specified thread.
+    A run represents the assistant's process of analyzing the conversation and generating a response.
+
     Args:
-        client (OpenAI): An initialized OpenAI client.
+        client (OpenAI): An initialized OpenAI client object.
         thread_id (str): The ID of the thread to run the assistant on.
         assistant_id (str): The ID of the assistant to run.
 
     Returns:
-        Run: The created run object.
+        Run: The created run object, containing details about the initiated assistant run.
+
+    Example:
+        >>> client = initialize_client()
+        >>> thread_id = "thread_abc123..."
+        >>> assistant_id = "asst_def456..."
+        >>> run = run_assistant(client, thread_id, assistant_id)
+        >>> print(run.status)
+        'queued'
     """
     return client.beta.threads.runs.create(
         thread_id=thread_id, assistant_id=assistant_id
@@ -225,13 +255,24 @@ def wait_for_run_completion(client: OpenAI, thread_id: str, run_id: str):
     """
     Wait for the assistant run to complete.
 
+    This function polls the status of a run until it's no longer in a 'queued' or 'in_progress' state.
+    It includes a small delay between checks to avoid excessive API calls.
+
     Args:
-        client (OpenAI): An initialized OpenAI client.
+        client (OpenAI): An initialized OpenAI client object.
         thread_id (str): The ID of the thread.
         run_id (str): The ID of the run to wait for.
 
     Returns:
-        Run: The completed run object.
+        Run: The completed run object, containing the final status and any output from the assistant.
+
+    Example:
+        >>> client = initialize_client()
+        >>> thread_id = "thread_abc123..."
+        >>> run_id = "run_ghi789..."
+        >>> completed_run = wait_for_run_completion(client, thread_id, run_id)
+        >>> print(completed_run.status)
+        'completed'
     """
     run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
     while run.status in ["queued", "in_progress"]:
@@ -243,12 +284,24 @@ def get_assistant_responses(client: OpenAI, thread_id: str) -> List[str]:
     """
     Retrieve and clean the assistant's responses from the thread.
 
+    This function fetches all messages in a thread and extracts the content of messages
+    sent by the assistant. It returns these responses as a list of strings.
+
     Args:
-        client (OpenAI): An initialized OpenAI client.
+        client (OpenAI): An initialized OpenAI client object.
         thread_id (str): The ID of the thread to retrieve responses from.
 
     Returns:
-        List[str]: A list of assistant responses.
+        List[str]: A list of assistant responses, where each response is a string.
+
+    Example:
+        >>> client = initialize_client()
+        >>> thread_id = "thread_abc123..."
+        >>> responses = get_assistant_responses(client, thread_id)
+        >>> for response in responses:
+        ...     print(response)
+        'Here's the weather forecast for today...'
+        'Is there anything else you'd like to know?'
     """
     message_list = client.beta.threads.messages.list(thread_id=thread_id)
     assistant_responses = [
@@ -262,12 +315,25 @@ def get_assistant(reference: str, assistant_id: str) -> List[str]:
     """
     Get the assistant's response for the given reference and assistant ID.
 
+    This function encapsulates the entire process of interacting with an AI assistant:
+    creating a thread, sending a message, running the assistant, and retrieving the responses.
+
     Args:
-        reference (str): The reference message to send to the assistant.
-        assistant_id (str): The ID of the assistant to use.
+        reference (str): The reference message to send to the assistant. This is typically
+                         the user's question or prompt.
+        assistant_id (str): The ID of the assistant to use for generating the response.
 
     Returns:
-        List[str]: A list of assistant responses.
+        List[str]: A list of assistant responses. Each response is a string containing
+                   the assistant's reply to the reference message.
+
+    Example:
+        >>> reference = "What are the three laws of robotics?"
+        >>> assistant_id = "asst_def456..."
+        >>> responses = get_assistant(reference, assistant_id)
+        >>> for response in responses:
+        ...     print(response)
+        '1. A robot may not injure a human being or, through inaction, allow a human being to come to harm...'
     """
     client = initialize_client()
     thread = create_thread(client)
@@ -362,6 +428,28 @@ def get_completion_api(
 
     return None
 
-def fix_json(json_string):
+def fix_json(json_string: str) -> str:
+    """
+    Fix and format a potentially malformed JSON string.
+
+    This function uses an AI model to correct and format a given JSON string.
+    It's particularly useful for handling JSON that may have syntax errors or
+    formatting issues.
+
+    Args:
+        json_string (str): The JSON string to fix and format. This can be a
+            malformed or incorrectly formatted JSON string.
+
+    Returns:
+        str: The fixed and formatted JSON string. If the input is valid JSON,
+            it will be returned in a standardized format. If the input is invalid,
+            the function attempts to correct common errors and return a valid JSON string.
+
+    Example:
+        >>> malformed_json = "{'key': 'value', 'nested': {'a':1, 'b': 2,}}"
+        >>> fixed_json = fix_json(malformed_json)
+        >>> print(fixed_json)
+        '{"key": "value", "nested": {"a": 1, "b": 2}}'
+    """
     prompt = f"You are a JSON formatter, fixing any issues with JSON formats. Review the following JSON: {json_string}. Return a fixed JSON formatted string but do not lead with ```json\n, without making changes to the content."
     return get_completion_api(prompt, "gemini-flash", "system", prompt)
