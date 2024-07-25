@@ -226,10 +226,10 @@ def get_completion_api(
     try:
         # Select the model and set the appropriate API key
         match model_name:
-            case "gpt-3.5-turbo" | "gpt-4" | "gpt-4o":
+            case "gpt-4o-mini" | "gpt-4" | "gpt-4o":
                 os.environ["OPENAI_API_KEY"] = get_api("OPEN-AI", "Mamba")
                 selected_model = model_name
-            case "claude-3.5-sonnet":
+            case "claude-3.5":
                 os.environ["ANTHROPIC_API_KEY"] = get_api("Anthropic", "CLI-Maya")
                 selected_model = "claude-3-5-sonnet-20240620"
             case "gemini-flash":
@@ -238,12 +238,18 @@ def get_completion_api(
             case "llama-3-70b":
                 os.environ["TOGETHERAI_API_KEY"] = get_api("TogetherAI", "API")
                 selected_model = "together_ai/meta-llama/Llama-3-70b-chat-hf"
+            case "llama-3.1-large":
+                os.environ["TOGETHERAI_API_KEY"] = get_api("TogetherAI", "API")
+                selected_model = "together_ai/meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo"
             case "groq-llama":
                 os.environ["GROQ_API_KEY"] = get_api("Groq", "Promptsys")
                 selected_model = "groq/llama3-70b-8192"
             case "groq-fast":
                 os.environ["GROQ_API_KEY"] = get_api("Groq", "Promptsys")
                 selected_model = "groq/llama3-8b-8192"
+            case "mistral-large":
+                os.environ["MISTRAL_API_KEY"] = get_api("MistralAI", "API")
+                selected_model = "mistral/mistral-large-latest"
             case _:
                 raise ValueError(f"Unsupported model: {model_name}")
 
