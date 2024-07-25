@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.1.4] - 2024-07-24
+- Updated version for PyPI release
+- Prepared package for PyPI upload
+
 ## [0.1.3] - 2024-07-16
 - Prepared repository for PyPI upload
 - Updated setup.py and pyproject.toml

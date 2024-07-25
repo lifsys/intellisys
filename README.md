@@ -10,6 +10,12 @@ You can install Intellisys using pip:
 pip install intellisys
 ```
 
+For the latest development version, you can install directly from GitHub:
+
+```
+pip install git+https://github.com/lifsys/intellisys.git
+```
+
 ## Requirements
 
 - Python 3.6 or higher
