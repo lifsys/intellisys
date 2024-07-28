@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.2.0] - 2024-07-27
+- Updated get_completion_api function to support more models
+- Improved error handling and logging
+- Updated README with new model information and usage examples
+
 ## [0.1.8] - 2024-07-25
 - Prepared package for PyPI update
 - Updated version number in relevant files

@@ -18,7 +18,7 @@ pip install git+https://github.com/lifsys/intellisys.git
 
 ## Requirements
 
-- Python 3.6 or higher
+- Python 3.7 or higher
 - A 1Password Connect server (for API key management)
 - Environment variables:
   - `OP_CONNECT_TOKEN`: Your 1Password Connect token
@@ -33,6 +33,7 @@ pip install git+https://github.com/lifsys/intellisys.git
 - JSON formatting and template rendering
 - Asynchronous assistant interactions
 - Template-based API calls
+- Improved error handling and logging
 
 ## Usage
 
@@ -50,7 +51,7 @@ print(response)
 ### Advanced Usage
 
 ```python
-from intellisys import template_api_json, get_assistant
+from intellisys import template_api_json, get_assistant, fix_json
 
 # Using a template for API calls
 render_data = {"user_name": "Alice"}
@@ -64,6 +65,11 @@ reference = "What's the weather like today?"
 responses = get_assistant(reference, assistant_id)
 for response in responses:
     print(response)
+
+# Fixing malformed JSON
+malformed_json = "{'key': 'value', 'nested': {'a':1, 'b': 2,}}"
+fixed_json = fix_json(malformed_json)
+print(fixed_json)
 ```
 
 ## Supported Models
@@ -76,6 +82,13 @@ Intellisys supports a variety of AI models:
 - TogetherAI: llama-3-70b, llama-3.1-large
 - Groq: groq-llama, groq-fast
 - MistralAI: mistral-large
+
+## New in Version 0.2.0
+
+- Enhanced `get_completion_api` function with support for more models
+- Improved error handling and logging
+- Added `fix_json` function for correcting malformed JSON strings
+- Updated documentation and usage examples
 
 ## API Reference
 
