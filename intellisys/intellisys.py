@@ -49,34 +49,6 @@ def get_api(item: str, key_name: str, vault: str = "API") -> str:
     except Exception as e:
         raise Exception(f"Connect Error: {e}")
 
-def fix_json(json_string: str) -> str:
-    """
-    Fix and format a JSON string using an AI model.
-
-    This function takes a potentially malformed JSON string and attempts to fix
-    and format it using an AI model. It uses the 'gemini-flash' model to process
-    the input and return a corrected JSON string.
-
-    Args:
-        json_string (str): The JSON string to fix and format. This can be a malformed
-            or incorrectly formatted JSON string.
-
-    Returns:
-        str: The fixed and formatted JSON string. If the input is valid JSON,
-            it will be returned in a standardized format. If the input is invalid,
-            the function attempts to correct common errors and return a valid JSON string.
-
-    Raises:
-        Any exceptions raised by the underlying get_completion_api function.
-
-    Example:
-        >>> malformed_json = "{'key': 'value', 'nested': {'a':1, 'b': 2,}}"
-        >>> fixed_json = fix_json(malformed_json)
-        >>> print(fixed_json)
-        '{"key": "value", "nested": {"a": 1, "b": 2}}'
-    """
-    prompt = f"You are a JSON formatter, fixing any issues with JSON formats. Review the following JSON: {json_string}. Return a fixed JSON formatted string but do not lead with ```json\n, without making changes to the content."
-    return get_completion_api(prompt, "gemini-flash", "system", prompt)
 
 def template_api_json(model: str, render_data: Dict, system_message: str, persona: str) -> Dict:
     """
@@ -347,15 +319,17 @@ def get_completion_api(
     prompt: str,
     model_name: str,
     mode: str = "simple",
-    system_message: Optional[str] = None,
+    system_message: Optional[str] = None
 ) -> Optional[str]:
     """
     Get the completion response from the API using the specified model.
 
     Args:
         prompt (str): The prompt to send to the API.
-        model_name (str): The name of the model to use for completion.
-        mode (str, optional): The mode of message sending (simple or system). Defaults to "simple".
+        model_name (str): The name of the model to use for completion. Supported models include:
+            'gpt-4o-mini', 'gpt-4', 'gpt-4o', 'claude-3.5', 'gemini-flash', 'llama-3-70b',
+            'llama-3.1-large', 'groq-llama', 'groq-fast', 'mistral-large'.
+        mode (str, optional): The mode of message sending ('simple' or 'system'). Defaults to "simple".
         system_message (Optional[str], optional): The system message to send if in system mode. Defaults to None.
 
     Returns:
@@ -365,34 +339,26 @@ def get_completion_api(
         ValueError: If an unsupported model or mode is specified.
     """
     try:
-        # Select the model and set the appropriate API key
-        match model_name:
-            case "gpt-4o-mini" | "gpt-4" | "gpt-4o":
-                os.environ["OPENAI_API_KEY"] = get_api("OPEN-AI", "Mamba")
-                selected_model = model_name
-            case "claude-3.5":
-                os.environ["ANTHROPIC_API_KEY"] = get_api("Anthropic", "CLI-Maya")
-                selected_model = "claude-3-5-sonnet-20240620"
-            case "gemini-flash":
-                os.environ["GEMINI_API_KEY"] = get_api("Gemini", "CLI-Maya")
-                selected_model = "gemini/gemini-1.5-flash"
-            case "llama-3-70b":
-                os.environ["TOGETHERAI_API_KEY"] = get_api("TogetherAI", "API")
-                selected_model = "together_ai/meta-llama/Llama-3-70b-chat-hf"
-            case "llama-3.1-large":
-                os.environ["TOGETHERAI_API_KEY"] = get_api("TogetherAI", "API")
-                selected_model = "together_ai/meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo"
-            case "groq-llama":
-                os.environ["GROQ_API_KEY"] = get_api("Groq", "Promptsys")
-                selected_model = "groq/llama3-70b-8192"
-            case "groq-fast":
-                os.environ["GROQ_API_KEY"] = get_api("Groq", "Promptsys")
-                selected_model = "groq/llama3-8b-8192"
-            case "mistral-large":
-                os.environ["MISTRAL_API_KEY"] = get_api("MistralAI", "API")
-                selected_model = "mistral/mistral-large-latest"
-            case _:
-                raise ValueError(f"Unsupported model: {model_name}")
+        # Model configurations
+        model_configs = {
+            "gpt-4o-mini": ("OPEN-AI", "Mamba", lambda x: x),
+            "gpt-4": ("OPEN-AI", "Mamba", lambda x: x),
+            "gpt-4o": ("OPEN-AI", "Mamba", lambda x: x),
+            "claude-3.5": ("Anthropic", "CLI-Maya", lambda _: "claude-3-5-sonnet-20240620"),
+            "gemini-flash": ("Gemini", "CLI-Maya", lambda _: "gemini/gemini-1.5-flash"),
+            "llama-3-70b": ("TogetherAI", "API", lambda _: "together_ai/meta-llama/Llama-3-70b-chat-hf"),
+            "llama-3.1-large": ("TogetherAI", "API", lambda _: "together_ai/meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo"),
+            "groq-llama": ("Groq", "Promptsys", lambda _: "groq/llama3-70b-8192"),
+            "groq-fast": ("Groq", "Promptsys", lambda _: "groq/llama3-8b-8192"),
+            "mistral-large": ("MistralAI", "API", lambda _: "mistral/mistral-large-latest"),
+        }
+
+        if model_name not in model_configs:
+            raise ValueError(f"Unsupported model: {model_name}")
+
+        api_name, key_name, model_func = model_configs[model_name]
+        os.environ[f"{api_name.upper()}_API_KEY"] = get_api(api_name, key_name)
+        selected_model = model_func(model_name)
 
         # Select message type
         match mode:
